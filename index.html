@@ -155,12 +155,12 @@
             }
         }
 
-        // 2. Script Generate Elemen Foto Otomatis
+        // 2. Script Generate Elemen Foto Otomatis (Format disesuaikan ke .jpeg)
         const container = document.getElementById("photoContainer");
         function generatePhotos() {
             for (let i = 0; i < totalFoto; i++) {
                 let img = document.createElement("img");
-                img.src = `foto (${i + 1}).jpg`; 
+                img.src = `foto (${i + 1}).jpeg`; 
                 if (i === 0) img.className = "active";
                 container.appendChild(img);
             }
