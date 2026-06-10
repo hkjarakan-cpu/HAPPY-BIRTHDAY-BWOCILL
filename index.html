@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Memories ✨</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&family=Dancing+Script:wght=700&family=Poppins:wght=300;400;600&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { width: 100%; height: 100%; font-family: 'Poppins', sans-serif; background-color: #ffe5ec; overflow: hidden; }
+
+        /* 1. INTRO TERMINAL SCREEN */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #111; z-index: 999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Courier Prime', monospace; color: #fb6f92; padding: 20px;
+            transition: opacity 1s ease, visibility 1s;
+        }
+        .terminal-text { font-size: 1.1rem; max-width: 500px; width: 100%; line-height: 1.8; white-space: pre-wrap; }
+
+        /* 2. HALAMAN UTAMA */
+        #main-content {
+            opacity: 0; visibility: hidden; transition: opacity 1.5s ease;
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%); padding: 20px;
+        }
+
+        .music-box { position: fixed; top: 20px; right: 20px; z-index: 100; background: rgba(255, 255, 255, 0.7); padding: 8px 15px; border-radius: 50px; backdrop-filter: blur(5px); }
+        .music-btn { background: #fb6f92; border: none; color: white; padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+
+        header h1 { font-family: 'Dancing Script', cursive; font-size: 2.5rem; color: #fb6f92; text-align: center; margin-bottom: 5px; }
+        header p { color: #666; text-align: center; margin-bottom: 20px; font-size: 0.9rem; }
+
+        /* 3. BINGKAI POLAROID AUTOLOAD (POLOS) */
+        .polaroid-wrapper {
+            background: white; padding: 15px 15px 20px 15px; border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); max-width: 380px; width: 100%;
+            transform: rotate(-2deg); transition: all 0.3s ease; z-index: 10;
+        }
+        .polaroid-wrapper:hover { transform: rotate(0deg) scale(1.02); }
+        
+        .photo-container {
+            width: 100%; aspect-ratio: 1/1; background-color: #eee; overflow: hidden; border: 1px solid #ddd;
+            position: relative;
+        }
+        .photo-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .photo-container img.active { display: block; animation: fadeIn 0.5s ease; }
+
+        .counter { font-size: 0.85rem; color: #888; text-align: center; margin-top: 15px; font-weight: bold; }
+
+        .nav-buttons { display: flex; justify-content: space-between; width: 100%; max-width: 380px; margin-top: 20px; z-index: 10; }
+        .nav-btn { background: white; border: 2px solid #fb6f92; color: #fb6f92; padding: 8px 20px; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+        .nav-btn:hover { background: #fb6f92; color: white; }
+
+        /* Pop-up Surat Akhir */
+        #final-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
+        .popup-content { background: white; padding: 30px; border-radius: 20px; max-width: 450px; width: 100%; text-align: center; border-top: 6px solid #fb6f92; box-shadow: 0 5px 25px rgba(0,0,0,0.2); max-height: 80vh; overflow-y: auto; }
+        .popup-content h2 { font-family: 'Dancing Script', cursive; color: #fb6f92; font-size: 2.5rem; margin-bottom: 15px; }
+        .popup-content p { font-size: 0.95rem; color: #4a4a4a; line-height: 1.6; text-align: left; margin-bottom: 20px; }
+
+        .heart { position: fixed; top: -10%; color: #ffb3c6; z-index: 1; user-select: none; pointer-events: none; animation: fall linear infinite; }
+        @keyframes fall { 0% { top: -10%; transform: translateX(0) rotate(0deg); opacity: 1; } 100% { top: 110%; transform: translateX(100px) rotate(360deg); opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="music-box">
+        <audio id="mySong" src="musik.mp3" loop></audio>
+        <button class="music-btn" onclick="toggleMusic()" id="musicBtn">🎵 Putar Musik</button>
+    </div>
+
+    <!-- 1. INTRO TERMINAL SCREEN -->
+    <div id="intro-overlay">
+        <div class="terminal-text" id="terminal"></div>
+    </div>
+
+    <!-- 2. HALAMAN UTAMA -->
+    <div id="main-content">
+        <header>
+            <h1>Our Beautiful Memories ✨</h1>
+            <p>Klik tombol di bawah foto untuk melihat kenangan kita</p>
+        </header>
+
+        <div class="polaroid-wrapper">
+            <div class="photo-container" id="photoContainer">
+                <!-- Foto dimuat otomatis -->
+            </div>
+            <div class="counter" id="counter">0 / 0</div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="prevPhoto()">⏮️ Mundur</button>
+            <button class="nav-btn" onclick="nextPhoto()">Lanjut ⏭️</button>
+        </div>
+    </div>
+
+    <!-- Pop-up Surat Cinta Akhir -->
+    <div id="final-popup">
+        <div class="popup-content">
+            <h2>Our Journey Continues... ❤️</h2> 
+            <p>
+                Halo Sayang, 🤍✨<br><br>
+                Hari ini, saat jam berdentang melewati angka dua belas, hal pertama yang langsung terlintas di pikiranku adalah betapa beruntungnya aku karena bumi masih mengizinkanku untuk merayakan hari kelahiranmu lagi tahun ini. Selamat ulang tahun, manusia paling pemaaf, paling sabar, dan paling indah yang pernah hadir di dalam hidupku. 🎂🎉🥳<br><br>
+                Aku mau mulai tulisan ini dengan sebuah pujian yang jujur dari lubuk hatiku yang paling dalam. Kamu itu... luar biasa. 🥺💖 Aku selalu kagum melihat bagaimana kamu menjalani hari-harimu, bagaimana kamu tetap tersenyum meski dunia sedang lelah-lahnya, dan bagaimana caramu memperlakukanku dengan begitu banyak ketulusan. Kamu punya sihir aneh yang selalu bisa bikin hari-hari mendungku jadi cerah lagi cuma lewat senyuman atau pelukanmu. Kamu adalah definisi dari keindahan yang nyata buat aku. 🥰🌷<br><br>
+                Terima kasih ya, Sayang... Terima kasih karena sudah lahir ke dunia ini. Terima kasih karena sudah memilih untuk bertahan, bertumbuh, dan berjuang sampai sejauh ini. Dan yang paling penting, terima kasih karena sudah mengizinkan aku menjadi bagian dari perjalanan hidupmu. Bersamamu, aku belajar banyak hal tentang arti mencintai tanpa pamrih. Di dekatmu, aku merasa selalu punya "rumah" yang aman untuk pulang, sejauh apa pun aku melangkah. 🏡💞🌈<br><br>
+                Maaf ya, kalau untuk saat ini aku mungkin belum sepenuhnya bisa membahagiakanmu dan belum bisa memberikanmu hadiah yang terbaik di hari spesialmu ini. Tapi aku janji, hal itu pasti akan selalu kuusahakan mati-matian nantinya demi melihat kamu tersenyum bahagia. 🥺🌱 Genggam terus tanganku, ya?<br><br>
+                Semangat ya Sayang untuk melewati hari-hari ke depan! 🌟💪 Aku tahu jarak yang membentang di antara kita sekarang ini sering kali bikin rindu jadi terasa berat, dan rasanya pasti melelahkan harus berjuang di tempat yang berbeda. Tapi tolong jangan pernah patah semangat, ya. Anggap hari-hari sibuk yang kamu lewati sekarang adalah anak tangga yang sedang kita susun bersama demi masa depan kita nanti. Setiap lelahmu di sana, ada doaku yang selalu menyertaimu di sini. Jarak ini cuma sementara, tapi sayangku ke kamu itu selamanya. 🗺️❤️✈️<br><br>
+                Di hari yang sangat spesial ini, doa-doaku melangit dengan sangat kencang untukmu:<br><br>
+                Semoga Tuhan selalu menjaga senyum indah itu di wajahmu. Semoga langkah kakimu selalu dituntun menuju hal-hal baik, kesuksesan yang berkah, dan kebahagiaan yang tidak ada habisnya. Aku berdoa agar kamu selalu diberikan kesehatan, kekuatan untuk mengejar semua mimpi-mimpimu, dan dijauhkan dari segala rasa sedih yang berat. 🤍 Amin.<br><br>
+                Kalau suatu saat nanti dunia luar terasa terlalu bising atau melelahkan buatmu, tolong ingat satu hal ini ya: kamu punya aku. Aku akan selalu ada di sini, di sampingmu secara doa dan hati, siap jadi tempatmu bersandar, siap jadi pendengar setiamu, dan siap jadi orang pertama yang menggenggam tanganmu saat kita bertemu nanti. Aku mau nemenin kamu bukan cuma di hari-hari bahagiamu saja, tapi di setiap jengkal proses hidupmu. 🤝🌻🎈<br><br>
+                Sekali lagi, selamat ulang tahun yang paling manis untuk orang yang paling kucintai. Semoga tahun ini membawa banyak kejutan indah buat kamu. I love you more than words could ever express, and I love you more and more each passing day. 🐣💕🐥<br><br>
+                Selamat merayakan hari jadimu, Sayangku! 🥂🎈🎂✨
+            </p>
+            <button class="nav-btn" onclick="tutupPopup()">Lihat Foto Lagi 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        const totalFoto = 100; 
+
+        // 1. Script Efek Terminal
+        const terminalElement = document.getElementById("terminal");
+        const lines = [
+            " [>] Loading love_memories_database.db...",
+            " [>] Extracting 1000GB of pure happiness...",
+            " [>] Target found: My Favorite Human 🥰",
+            " [>] Compiling sweet_moments.exe...",
+            " [>] Deployment successful! Enjoy the journey..."
+        ];
+        let lineIndex = 0, charIndex = 0;
+
+        function typeTerminal() {
+            if (lineIndex < lines.length) {
+                if (charIndex < lines[lineIndex].length) {
+                    terminalElement.innerHTML += lines[lineIndex].charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeTerminal, 30);
+                } else {
+                    terminalElement.innerHTML += "\n";
+                    lineIndex++; charIndex = 0;
+                    setTimeout(typeTerminal, 400);
+                }
+            } else {
+                setTimeout(() => {
+                    document.getElementById("intro-overlay").style.opacity = "0";
+                    setTimeout(() => {
+                        document.getElementById("intro-overlay").style.visibility = "hidden";
+                        document.getElementById("main-content").style.opacity = "1";
+                        document.getElementById("main-content").style.visibility = "visible";
+                        buatHati();
+                    }, 1000);
+                }, 1000);
+            }
+        }
+
+        // 2. Script Generate Elemen Foto Otomatis
+        const container = document.getElementById("photoContainer");
+        function generatePhotos() {
+            for (let i = 0; i < totalFoto; i++) {
+                let img = document.createElement("img");
+                img.src = `foto (${i + 1}).jpg`; 
+                if (i === 0) img.className = "active";
+                container.appendChild(img);
+            }
+        }
+        
+        generatePhotos();
+        window.onload = () => { typeTerminal(); updatePolaroid(); };
+
+        // 3. Script Kontrol Navigasi Galeri
+        let currentIndex = 0;
+        const images = container.getElementsByTagName("img");
+        const counterBox = document.getElementById("counter");
+
+        function updatePolaroid() {
+            if(images.length === 0) return;
+            for (let i = 0; i < images.length; i++) { images[i].classList.remove("active"); }
+            images[currentIndex].classList.add("active");
+            counterBox.innerText = `${currentIndex + 1} / ${images.length}`;
+        }
+
+        function nextPhoto() {
+            if (currentIndex < images.length - 1) { currentIndex++; updatePolaroid(); } 
+            else { document.getElementById("final-popup").style.display = "flex"; }
+        }
+
+        function prevPhoto() {
+            if (currentIndex > 0) { currentIndex--; updatePolaroid(); }
+        }
+
+        function tutupPopup() { document.getElementById("final-popup").style.display = "none"; currentIndex = 0; updatePolaroid(); }
+        const song = document.getElementById("mySong");
+        const musicBtn = document.getElementById("musicBtn");
+        function toggleMusic() { if (song.paused) { song.play(); musicBtn.innerText = "⏸️ Pause Musik"; } else { song.pause(); musicBtn.innerText = "🎵 Putar Musik"; } }
+
+        function buatHati() {
+            const jumlahHati = 25;
+            const simbol = ['❤️', '💖', '✨', '🌸', '💕'];
+            for (let i = 0; i < jumlahHati; i++) {
+                let hati = document.createElement('div');
+                hati.className = 'heart';
+                hati.innerText = simbol[Math.floor(Math.random() * simbol.length)];
+                hati.style.left = Math.random() * 100 + 'vw';
+                hati.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                hati.style.animationDelay = Math.random() * 5 + 's';
+                hati.style.fontSize = (Math.random() * 15 + 15) + 'px';
+                document.body.appendChild(hati);
+            }
+        }
+    </script>
+</body>
+</html>
